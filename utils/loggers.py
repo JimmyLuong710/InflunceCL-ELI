@@ -19,20 +19,49 @@ useless_args = ['dataset', 'tensorboard', 'validation', 'model',
 
 
 def print_mean_accuracy(mean_acc: np.ndarray, task_number: int,
-                        setting: str) -> None:
+                        setting: str, with_ebm = False, log_each_task=False) -> None:
     """
     Prints the mean accuracy on stderr.
     :param mean_acc: mean accuracy value
     :param task_number: task index
     :param setting: the setting of the benchmark
     """
+    if log_each_task == True: 
+        accs, tasks = mean_acc
+        for i, acc in enumerate(accs): 
+            if with_ebm == True:
+                print('\nAccuracy ELI [Class-IL] for task {}: {} %'.format(
+                i + 1, round(acc, 2)), file=sys.stderr)
+            else:
+                print('\nAccuracy [Class-IL] for task {}: {} %'.format(
+                    i + 1, round(acc, 2)), file=sys.stderr)
+        
+        for i, task in enumerate(tasks): 
+            if with_ebm == True:
+                print('\nAccuracy ELI [Task-IL] for task {}: {} %'.format(
+                i + 1, round(task, 2)), file=sys.stderr)
+            else:
+                print('\nAccuracy [Task-IL] for task {}: {} %'.format(
+                    i + 1, round(task, 2)), file=sys.stderr)
+        return
+
     if setting == 'domain-il':
         mean_acc, _ = mean_acc
-        print('\nAccuracy for {} task(s): {} %'.format(
-            task_number, round(mean_acc, 2)), file=sys.stderr)
+
+        if with_ebm == True:
+            print('\nAccuracy ELI for task {}: {} %'.format(
+                task_number, round(mean_acc, 2)), file=sys.stderr)
+        else:
+            print('\nAccuracy for task {}: {} %'.format(
+                task_number, round(mean_acc, 2)), file=sys.stderr)
     else:
         mean_acc_class_il, mean_acc_task_il = mean_acc
-        print('\nAccuracy for {} task(s): \t [Class-IL]: {} %'
+        if with_ebm == True:
+            print('\nAccuracy ELI for task {}: \t [Class-IL]: {} %'
+              ' \t [Task-IL]: {} %\n'.format(task_number, round(
+                  mean_acc_class_il, 2), round(mean_acc_task_il, 2)), file=sys.stderr)
+        else:
+            print('\nAccuracy for task {}: \t [Class-IL]: {} %'
               ' \t [Task-IL]: {} %\n'.format(task_number, round(
                   mean_acc_class_il, 2), round(mean_acc_task_il, 2)), file=sys.stderr)
 
