@@ -53,32 +53,29 @@ def evaluate(model: ContinualModel, dataset: ContinualDataset, aligner: EBMAlign
             continue
         correct, correct_mask_classes, total = 0.0, 0.0, 0.0
         for data in test_loader:
-            with torch.no_grad():
-                inputs, labels = data
-                inputs, labels = inputs.to(model.device), labels.to(model.device)
-                if 'class-il' not in model.COMPATIBILITY:
-                    if evaluate_with_ebm: 
-                        z = model.net(inputs, 'features')
-                        z = aligner.align_latents(z)
-                        outputs = model.net.get_output(z)
-                    else:     
-                        outputs = model(inputs, k)
-                else:
-                    if evaluate_with_ebm: 
-                        z = model.net(inputs, 'features')
-                        z = aligner.align_latents(z)
-                        outputs = model.net.get_output(z)
-                    else:  
-                        outputs = model(inputs)
-
+            inputs, labels = data
+            inputs, labels = inputs.to(model.device), labels.to(model.device)
+            if 'class-il' not in model.COMPATIBILITY:
+                if evaluate_with_ebm: 
+                    z = model.net(inputs, 'features')
+                    z = aligner.align_latents(z)
+                    outputs = model.net.get_output(z)
+                else:     
+                    outputs = model(inputs, k)
+            else:
+                if evaluate_with_ebm: 
+                    z = model.net(inputs, 'features')
+                    z = aligner.align_latents(z)
+                    outputs = model.net.get_output(z)
+                else:  
+                    outputs = model(inputs)
+            _, pred = torch.max(outputs.data, 1)
+            correct += torch.sum(pred == labels).item()
+            total += labels.shape[0]
+            if dataset.SETTING == 'class-il':
+                mask_classes(outputs, dataset, k)
                 _, pred = torch.max(outputs.data, 1)
-                correct += torch.sum(pred == labels).item()
-                total += labels.shape[0]
-
-                if dataset.SETTING == 'class-il':
-                    mask_classes(outputs, dataset, k)
-                    _, pred = torch.max(outputs.data, 1)
-                    correct_mask_classes += torch.sum(pred == labels).item()
+                correct_mask_classes += torch.sum(pred == labels).item()
 
         accs.append(correct / total * 100
                     if 'class-il' in model.COMPATIBILITY else 0)
