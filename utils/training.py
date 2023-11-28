@@ -67,9 +67,12 @@ def evaluate(model: ContinualModel, dataset: ContinualDataset, aligner: EBMAlign
                     outputs = model(inputs, k)
             else:
                 if evaluate_with_ebm: 
-                    z = model.net(inputs, 'features')
-                    z = aligner.align_latents(z)
-                    outputs = model.net.get_output(z)
+                    if k < len(dataset.test_loaders) - 1: 
+                        z = model.net(inputs, 'features')
+                        z = aligner.align_latents(z)
+                        outputs = model.net.get_output(z)
+                    else: 
+                        outputs = model(inputs)
                 else:  
                     outputs = model(inputs)
             _, pred = torch.max(outputs.data, 1)
