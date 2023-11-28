@@ -57,9 +57,12 @@ def evaluate(model: ContinualModel, dataset: ContinualDataset, aligner: EBMAlign
             inputs, labels = inputs.to(model.device), labels.to(model.device)
             if 'class-il' not in model.COMPATIBILITY:
                 if evaluate_with_ebm: 
-                    z = model.net(inputs, 'features')
-                    z = aligner.align_latents(z)
-                    outputs = model.net.get_output(z)
+                    if k != len(dataset.test_loaders) - 1:
+                        z = model.net(inputs, 'features')
+                        z = aligner.align_latents(z)
+                        outputs = model.net.get_output(z)
+                    else: 
+                        outputs = model(inputs, k)
                 else:     
                     outputs = model(inputs, k)
             else:
