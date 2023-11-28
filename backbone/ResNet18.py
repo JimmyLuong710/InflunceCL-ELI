@@ -148,6 +148,9 @@ class ResNet(MammothBackbone):
 
         raise NotImplementedError("Unknown return type")
 
+    def get_output(self, feature):
+        out = self.classifier(feature)
+        return out
 
 def resnet18(nclasses: int, nf: int=64) -> ResNet:
     """
