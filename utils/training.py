@@ -167,6 +167,10 @@ def train(model: ContinualModel, dataset: ContinualDataset,
 
         accs_with_ebm = evaluate(model, dataset, aligner, evaluate_with_ebm=True)
         accs = evaluate(model, dataset, aligner, evaluate_with_ebm=False)
+
+        print("================ Accuracy for each task of task {} ===============".format(t + 1))
+        print_mean_accuracy(accs, t + 1, dataset.SETTING, False, True)
+        print_mean_accuracy(accs_with_ebm, t + 1, dataset.SETTING, True, True)
         
         results_with_ebm.append(accs_with_ebm[0])
         results_with_ebm_mask_classes.append(accs_with_ebm[1])
@@ -175,10 +179,11 @@ def train(model: ContinualModel, dataset: ContinualDataset,
         results_mask_classes.append(accs[1])
 
         mean_acc = np.mean(accs, axis=1)
+        print("================ Average accuracy for task {} ===============".format(t + 1))
         print_mean_accuracy(mean_acc, t + 1, dataset.SETTING)
         
         mean_acc_with_ebm = np.mean(accs_with_ebm, axis=1)
-        print_mean_accuracy(mean_acc_with_ebm, t + 1, dataset.SETTING)
+        print_mean_accuracy(mean_acc_with_ebm, t + 1, dataset.SETTING, True)
 
         if not args.disable_log:
             logger.log(mean_acc)
